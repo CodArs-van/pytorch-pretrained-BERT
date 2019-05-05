@@ -89,6 +89,10 @@ class DataProcessor(object):
         """Gets the list of labels for this data set."""
         raise NotImplementedError()
 
+    def pad_examples(self, set_type, examples, stride):
+        """Pad examples to fix multi-gpu issue"""
+        return examples
+
     @classmethod
     def _read_tsv(cls, input_file, quotechar=None):
         """Reads a tab separated value file."""
@@ -275,6 +279,20 @@ class JigsawProcessor(DataProcessor):
             label = line[1]
             examples.append(
                 InputExample(guid=guid, text_a=text_a, text_b=None, label=label))
+        return examples
+
+    def pad_examples(self, set_type, examples, stride):
+        """Pad examples to fix multi-gpu issue"""
+        length = len(examples)
+        if length % stride != 0:
+            n_pad = stride - (length % stride)
+            logger.info("  Num pad = %d", n_pad)
+            for i in range(length, length + n_pad):
+                guid = "%s-%s-pad" % (set_type, i)
+                text_a = "This is just for padding"
+                label = 0.0
+                examples.append(
+                    InputExample(guid=guid, text_a=text_a, text_b=None, label=label))
         return examples
 
 
@@ -781,6 +799,7 @@ def main():
     num_train_optimization_steps = None
     if args.do_train:
         train_examples = processor.get_train_examples(args.data_dir)
+        train_examples = processor.pad_examples('train', train_examples, args.train_batch_size)
         num_train_optimization_steps = int(
             len(train_examples) / args.train_batch_size / args.gradient_accumulation_steps) * args.num_train_epochs
         if args.local_rank != -1:
