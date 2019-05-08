@@ -262,7 +262,12 @@ class JigsawProcessor(DataProcessor):
 
     def get_dev_examples(self, data_dir):
         """See base class."""
-        return None
+        lines = [
+            ["id", "target", "comment_text"],
+            ['dev0', '0.9', 'You stupid pig!!!!'],
+            ['dev1', '0.0', 'Hi do you want to play pingpong today?'],
+        ]
+        return self._create_examples(lines, "dev")
 
     def get_labels(self):
         """See base class."""
