@@ -35,4 +35,4 @@ if __name__ == '__main__':
         subprocess.call("python run_classifier.py --task_name jigsaw --do_train --do_lower_case     \
             --data_dir /hdfs/input/xiaguo/ --bert_model bert-base-uncased --max_seq_length {}       \
             --train_batch_size {} --learning_rate {} --num_train_epochs {} --seed {}                \
-            --output_dir {}".format(msl, bs, lr, nepoch, seed, output_dir), shell=True)
+            --output_dir {}".format(msl, bs, lr, n, seed, output_dir), shell=True)
