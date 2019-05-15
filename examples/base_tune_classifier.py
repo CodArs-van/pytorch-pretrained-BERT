@@ -23,7 +23,7 @@ if __name__ == '__main__':
 
     for seed, lr, bs, n in params:
         output_dir = './tmp/js-base-msl{}-bs{}-lr{}-n{}-seed{}'.format(msl, bs, lr.replace('-', ''), n, seed)
-        with open(".txt".format(sys.argv[1]), "a") as f:
+        with open("{}.txt".format(sys.argv[1]), "a") as f:
             print(output_dir)
             f.write(output_dir)
             if os.path.exists(output_dir):
