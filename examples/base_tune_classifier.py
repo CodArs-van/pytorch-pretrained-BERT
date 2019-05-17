@@ -22,10 +22,12 @@ elif sys.argv[1] == '3':
     msl = 256
     md = 'cased'
     dlc = ''
-else:
+elif sys.argv[1] == '4':
     msl = 384
     md = 'cased'
     dlc = ''
+else:
+    raise ValueError("Not recognized argv")
 
 if __name__ == '__main__':
     params = []
