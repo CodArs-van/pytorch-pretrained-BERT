@@ -9,15 +9,23 @@ seeds = [7, 8, 6]
 if sys.argv[1] == '0':
     msl = 256
     md = 'uncased'
+    dlc = '--do-lower-case'
 elif sys.argv[1] == '1':
     msl = 384
     md = 'uncased'
+    dlc = '--do-lower-case'
 elif sys.argv[1] == '2':
     msl = 512
     md = 'uncased'
+    dlc = '--do-lower-case'
+elif sys.argv[1] == '3':
+    msl = 256
+    md = 'cased'
+    dlc = ''
 else:
     msl = 384
     md = 'cased'
+    dlc = ''
 
 if __name__ == '__main__':
     params = []
@@ -38,7 +46,7 @@ if __name__ == '__main__':
                 f.write('\n')
                 continue
             f.write('\n')
-        subprocess.call("python run_classifier.py --task_name jigsaw --do_train --do_lower_case     \
-            --data_dir /hdfs/input/xiaguo/ --bert_model bert-base-{} --max_seq_length {}       \
-            --train_batch_size {} --learning_rate {} --num_train_epochs {} --seed {}                \
-            --output_dir {}".format(md, msl, bs, lr, n, seed, output_dir), shell=True)
+        subprocess.call("python run_classifier.py --task_name jigsaw --do_train {}          \
+            --data_dir /hdfs/input/xiaguo/ --bert_model bert-base-{} --max_seq_length {}    \
+            --train_batch_size {} --learning_rate {} --num_train_epochs {} --seed {}        \
+            --output_dir {}".format(dlc, md, msl, bs, lr, n, seed, output_dir), shell=True)
