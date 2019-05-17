@@ -8,10 +8,16 @@ bss = [32, 64]
 seeds = [7, 8, 6]
 if sys.argv[1] == '0':
     msl = 256
+    md = 'uncased'
 elif sys.argv[1] == '1':
     msl = 384
+    md = 'uncased'
 elif sys.argv[1] == '2':
     msl = 512
+    md = 'uncased'
+else:
+    msl = 384
+    md = 'cased'
 
 if __name__ == '__main__':
     params = []
@@ -22,7 +28,7 @@ if __name__ == '__main__':
                     params.append((seed, lr, bs, n))
 
     for seed, lr, bs, n in params:
-        output_dir = './tmp/js-base-msl{}-bs{}-lr{}-n{}-seed{}'.format(msl, bs, lr.replace('-', ''), n, seed)
+        output_dir = './tmp/js-base-msl{}-bs{}-lr{}-n{}-seed{}-md{}'.format(msl, bs, lr.replace('-', ''), n, seed, md)
         with open("{}.txt".format(sys.argv[1]), "a") as f:
             print(output_dir)
             f.write(output_dir)
@@ -33,6 +39,6 @@ if __name__ == '__main__':
                 continue
             f.write('\n')
         subprocess.call("python run_classifier.py --task_name jigsaw --do_train --do_lower_case     \
-            --data_dir /hdfs/input/xiaguo/ --bert_model bert-base-uncased --max_seq_length {}       \
+            --data_dir /hdfs/input/xiaguo/ --bert_model bert-base-{} --max_seq_length {}       \
             --train_batch_size {} --learning_rate {} --num_train_epochs {} --seed {}                \
-            --output_dir {}".format(msl, bs, lr, n, seed, output_dir), shell=True)
+            --output_dir {}".format(md, msl, bs, lr, n, seed, output_dir), shell=True)
