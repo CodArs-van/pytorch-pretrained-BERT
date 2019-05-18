@@ -9,23 +9,35 @@ seeds = [7, 8, 6]
 if sys.argv[1] == '0':
     msl = 256
     md = 'uncased'
-    dlc = '--do-lower-case'
+    dlc = '--do_lower_case'
+    task = 'jigsaw'
 elif sys.argv[1] == '1':
     msl = 384
     md = 'uncased'
-    dlc = '--do-lower-case'
+    dlc = '--do_lower_case'
+    task = 'jigsaw'
 elif sys.argv[1] == '2':
-    msl = 512
+    msl = 320
     md = 'uncased'
-    dlc = '--do-lower-case'
+    dlc = '--do_lower_case'
+    bss = [64]
+    task = 'jigsaw-cls'
 elif sys.argv[1] == '3':
     msl = 256
     md = 'cased'
     dlc = ''
+    task = 'jigsaw'
 elif sys.argv[1] == '4':
     msl = 384
     md = 'cased'
     dlc = ''
+    task = 'jigsaw'
+elif sys.argv[1] == '5':
+    msl = 320
+    md = 'uncased'
+    dlc = '--do_lower_case'
+    bss = [32]
+    task = 'jigsaw-cls'
 else:
     raise ValueError("Not recognized argv")
 
@@ -48,7 +60,7 @@ if __name__ == '__main__':
                 f.write('\n')
                 continue
             f.write('\n')
-        subprocess.call("python run_classifier.py --task_name jigsaw --do_train {}          \
+        subprocess.call("python run_classifier.py --task_name {} --do_train {}              \
             --data_dir /hdfs/input/xiaguo/ --bert_model bert-base-{} --max_seq_length {}    \
             --train_batch_size {} --learning_rate {} --num_train_epochs {} --seed {}        \
-            --output_dir {}".format(dlc, md, msl, bs, lr, n, seed, output_dir), shell=True)
+            --output_dir {}".format(task, dlc, md, msl, bs, lr, n, seed, output_dir), shell=True)

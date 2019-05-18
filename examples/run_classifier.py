@@ -326,7 +326,7 @@ class JigsawClsProcessor(DataProcessor):
                 continue
             guid = "%s-%s" % (set_type, line[0])
             text_a = line[2]
-            label = ['1' if float(line[1]) >= 0.5 else '0']
+            label = '1' if float(line[1]) >= 0.5 else '0'
             examples.append(
                 InputExample(guid=guid, text_a=text_a, text_b=None, label=label))
         return examples
@@ -340,7 +340,7 @@ class JigsawClsProcessor(DataProcessor):
             for i in range(length, length + n_pad):
                 guid = "%s-%s-pad" % (set_type, i)
                 text_a = "This is just for padding"
-                label = ['0']
+                label = '0'
                 examples.append(
                     InputExample(guid=guid, text_a=text_a, text_b=None, label=label))
         return examples
