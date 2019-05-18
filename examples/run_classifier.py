@@ -301,6 +301,51 @@ class JigsawProcessor(DataProcessor):
         return examples
 
 
+class JigsawClsProcessor(DataProcessor):
+    """Processor for the Jigsaw data set (Kaggle version)."""
+
+    def get_train_examples(self, data_dir):
+        """See base class."""
+        return self._create_examples(
+            self._read_csv(os.path.join(data_dir, "train.csv")), "train")
+
+    def get_dev_examples(self, data_dir):
+        """See base class."""
+        lines = []
+        return self._create_examples(lines, "dev")
+
+    def get_labels(self):
+        """See base class."""
+        return ['0', '1']
+
+    def _create_examples(self, lines, set_type):
+        """Creates examples for the training and dev sets."""
+        examples = []
+        for i, line in enumerate(lines):
+            if i == 0:
+                continue
+            guid = "%s-%s" % (set_type, line[0])
+            text_a = line[2]
+            label = ['1' if float(line[1]) >= 0.5 else '0']
+            examples.append(
+                InputExample(guid=guid, text_a=text_a, text_b=None, label=label))
+        return examples
+
+    def pad_examples(self, set_type, examples, stride):
+        """Pad examples to fix multi-gpu issue"""
+        length = len(examples)
+        if length % stride != 0:
+            n_pad = stride - (length % stride)
+            logger.info("  Num pad = %d", n_pad)
+            for i in range(length, length + n_pad):
+                guid = "%s-%s-pad" % (set_type, i)
+                text_a = "This is just for padding"
+                label = ['0']
+                examples.append(
+                    InputExample(guid=guid, text_a=text_a, text_b=None, label=label))
+        return examples
+
+
 class StsbProcessor(DataProcessor):
     """Processor for the STS-B data set (GLUE version)."""
 
@@ -735,6 +780,7 @@ def main():
         "rte": RteProcessor,
         "wnli": WnliProcessor,
         "jigsaw": JigsawProcessor,
+        "jigsaw-cls": JigsawClsProcessor,
     }
 
     output_modes = {
@@ -748,6 +794,7 @@ def main():
         "rte": "classification",
         "wnli": "classification",
         "jigsaw": "regression",
+        "jigsaw-cls": "classification",
     }
 
     if args.local_rank == -1 or args.no_cuda:

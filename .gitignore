@@ -123,3 +123,6 @@ tensorflow_code
 
 # Models
 models
+
+*.csv
+*.tsv
