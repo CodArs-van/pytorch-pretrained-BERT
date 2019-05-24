@@ -23,9 +23,11 @@ elif sys.argv[1] == '3':
 elif sys.argv[1] == '4':
     msl = 256
     task = 'jigsaw-c'
+    cls_model = 'default'
 elif sys.argv[1] == '5':
     msl = 384
     task = 'jigsaw-c'
+    cls_model = 'default'
 else:
     raise ValueError("Not recognized argv")
 
@@ -63,4 +65,4 @@ if __name__ == '__main__':
             output_subfile = '{}-{}.csv'.format(name, subdir)
             subprocess.call("python infer_jigsaw19.py --do_lower_case --data_dir /hdfs/input/xiaguo \
                 --bert_model {} --max_seq_length {} --output_dir {} --output_file {} --task_name {} \
-                --infer_batch_size 64".format(output_dir, msl, output_subdir, output_subfile, task), shell=True)
+                --infer_batch_size 64".format(output_subdir, msl, output_subdir, output_subfile, task), shell=True)

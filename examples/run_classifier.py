@@ -311,7 +311,10 @@ class JigsawRegressionProcessor(JigsawProcessor):
         examples = []
         for line in lines:
             guid = "{}-{}".format(set_type, line[0])
-            text_a, label = (line[1], "7") if set_type == "test" else (line[2], line[1])
+            if set_type == "test":
+                text_a, label = (line[1], "0.5")
+            else:
+                text_a, label = (line[1], line[2]) if set_type == "train_18" else (line[2], line[1])
             examples.append(InputExample(guid, text_a, None, label))
         return examples
 
@@ -326,22 +329,12 @@ class JigsawClassifyProcessor(JigsawProcessor):
     def _create_examples(self, lines, set_type):
         """Creates examples for the training and dev sets."""
         examples = []
-        for i, line in enumerate(lines):
-            if i == 0:
-                continue
-            guid = "%s-%s" % (set_type, line[0])
-            text_a = line[2]
-            label = '1' if float(line[1]) >= 0.5 else '0'
-            examples.append(
-                InputExample(guid=guid, text_a=text_a, text_b=None, label=label))
-        return examples
-
-    def _create_examples(self, lines, set_type):
-        """Creates examples for the training and dev sets."""
-        examples = []
         for line in lines:
             guid = "{}-{}".format(set_type, line[0])
-            text_a, label = (line[1], "7") if set_type == "test" else (line[2], "1" if float(line[1]) >= 0.5 else "0")
+            if set_type =="test":
+                text_a, label = (line[1], "0")
+            else:
+                text_a, label = (line[1], float(line[2])) if set_type == "train_18" else (line[2], "1" if float(line[1]) >= 0.5 else "0")
             examples.append(InputExample(guid, text_a, None, label))
         return examples
 
@@ -874,8 +867,6 @@ def main():
         train_examples = processor.get_train_examples(args.data_dir)
         train_examples = processor.pad_examples('train', train_examples, args.train_batch_size, output_mode == 'regression')
 
-        train_examples = train_examples[:1000]
-
         num_train_optimization_steps = int(
             len(train_examples) / args.train_batch_size / args.gradient_accumulation_steps) * args.num_train_epochs
         if args.local_rank != -1:
@@ -986,7 +977,7 @@ def main():
             tr_loss = 0
             nb_tr_examples, nb_tr_steps, nb_tr_steps_save, nb_tr_steps_save_index = 0, 0, 0, 0
             nb_tr_steps_total = len(train_dataloader)
-            nb_tr_steps_5percent = nb_tr_steps_total // 20
+            nb_tr_steps_5percent = nb_tr_steps_total // 10
             for step, batch in enumerate(tqdm(train_dataloader, desc="Iteration")):
                 batch = tuple(t.to(device) for t in batch)
                 input_ids, input_mask, segment_ids, label_ids = batch

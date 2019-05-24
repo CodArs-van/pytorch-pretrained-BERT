@@ -316,6 +316,7 @@ def main():
     model.to(device)
 
     infer_examples = processor.get_test_examples(args.data_dir)
+
     infer_features = convert_examples_to_features(
         infer_examples, label_list, args.max_seq_length, tokenizer, output_mode)
     logger.info("***** Running evaluation *****")
