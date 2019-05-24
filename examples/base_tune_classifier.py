@@ -58,3 +58,9 @@ if __name__ == '__main__':
         subprocess.call("python infer_jigsaw19.py --do_lower_case --data_dir /hdfs/input/xiaguo \
             --bert_model {} --max_seq_length {} --output_dir {} --output_file {} --task_name {} \
             --infer_batch_size 64".format(output_dir, msl, output_dir, output_file, task), shell=True)
+        for subdir in [f.name for f in os.scandir(output_dir) if f.is_dir()]:
+            output_subdir = os.path.join(output_dir, subdir)
+            output_subfile = '{}-{}.csv'.format(name, subdir)
+            subprocess.call("python infer_jigsaw19.py --do_lower_case --data_dir /hdfs/input/xiaguo \
+                --bert_model {} --max_seq_length {} --output_dir {} --output_file {} --task_name {} \
+                --infer_batch_size 64".format(output_dir, msl, output_subdir, output_subfile, task), shell=True)
