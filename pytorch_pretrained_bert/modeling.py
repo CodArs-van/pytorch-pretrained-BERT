@@ -935,6 +935,36 @@ class BertForNextSentencePrediction(BertPreTrainedModel):
             return seq_relationship_score
 
 
+class BertForSequenceClassificationContext(BertPreTrainedModel):
+
+    def __init__(self, config, num_labels):
+        super(BertForSequenceClassificationContext, self).__init__(config)
+        self.num_labels = num_labels
+        self.bert = BertModel(config)
+        self.dropout = nn.Dropout(config.hidden_dropout_prob)
+        self.classifier = nn.Linear(config.hidden_size * 2, num_labels)
+        self.apply(self.init_bert_weights)
+
+    def forward(self, input_ids, token_type_ids=None, attention_mask=None, labels=None):
+        sequence_output, pooled_output = self.bert(input_ids, token_type_ids, attention_mask, output_all_encoded_layers=False)
+        pooled_output = self.dropout(pooled_output)
+
+        expanded_attention_mask = attention_mask.unsqueeze(-1).expand(sequence_output.size()).float()
+        masked_seq_output = sequence_output * expanded_attention_mask
+        masked_seq_output = torch.sum(masked_seq_output, dim=1)
+        masked_seq_output = self.dropout(masked_seq_output)
+        
+        final_output = torch.cat([pooled_output, masked_seq_output], dim=1)
+        logits = self.classifier(final_output)
+
+        if labels is not None:
+            loss_fct = CrossEntropyLoss()
+            loss = loss_fct(logits.view(-1, self.num_labels), labels.view(-1))
+            return loss
+        else:
+            return logits
+
+
 class BertForSequenceClassification(BertPreTrainedModel):
     """BERT model for classification.
     This module is composed of the BERT model with a linear layer on top of

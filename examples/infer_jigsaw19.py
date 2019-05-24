@@ -18,9 +18,11 @@ from scipy.stats import pearsonr, spearmanr
 from sklearn.metrics import matthews_corrcoef, f1_score
 
 from pytorch_pretrained_bert.file_utils import PYTORCH_PRETRAINED_BERT_CACHE, WEIGHTS_NAME, CONFIG_NAME
-from pytorch_pretrained_bert.modeling import BertForSequenceClassification, BertConfig
+from pytorch_pretrained_bert.modeling import BertForSequenceClassification, BertForSequenceClassificationContext, BertConfig
 from pytorch_pretrained_bert.tokenization import BertTokenizer
 from pytorch_pretrained_bert.optimization import BertAdam, WarmupLinearSchedule
+
+from run_classifier import JigsawRegressionProcessor, JigsawClassifyProcessor
 
 logger = logging.getLogger(__name__)
 
@@ -87,64 +89,6 @@ class DataProcessor(object):
                 lines.append(line)
             return lines
 
-
-class JigsawProcessor(DataProcessor):
-    """Processor for the Jigsaw data set (Kaggle version)."""
-
-    def get_train_examples(self, data_dir):
-        """See base class."""
-        return self._create_examples(
-            self._read_csv(os.path.join(data_dir, "train.csv")), "train")
-
-    def get_test_examples(self, data_dir):
-        """See base class."""
-        return self._create_examples(
-            self._read_csv(os.path.join(data_dir, "test.csv"), is_test=True), "test")
-
-    def get_labels(self):
-        """See base class."""
-        return [None]
-
-    def _create_examples(self, lines, set_type):
-        """Creates examples for the training and dev sets."""
-        examples = []
-        for i, line in enumerate(lines):
-            guid = "%s-%s" % (set_type, line[0])
-            text_a = line[2]
-            label = line[1]
-            examples.append(
-                InputExample(guid=guid, text_a=text_a, text_b=None, label=label))
-        return examples
-
-    def pad_examples(self, set_type, examples, stride):
-        """Pad examples to fix multi-gpu issue"""
-        length = len(examples)
-        if length % stride != 0:
-            n_pad = stride - (length % stride)
-            logger.info("  Num pad = %d", n_pad)
-            for i in range(length, length + n_pad):
-                guid = "%s-%s-pad" % (set_type, i)
-                text_a = "This is just for padding"
-                label = 0.0
-                examples.append(
-                    InputExample(guid=guid, text_a=text_a, text_b=None, label=label))
-        return examples
-
-    @classmethod
-    def _read_csv(cls, input_file, is_test=False):
-        """Read a comma separated value file."""
-        import pandas as pd
-        df = pd.read_csv(input_file)
-        lines = []
-        if is_test:
-            for cid, comment_text in zip(df['id'], df['comment_text']):
-                line = [cid, -1.0, comment_text]
-                lines.append(line)
-        else:
-            for cid, target, comment_text in zip(df['id'], df['target'], df['comment_text']):
-                line = [cid, target, comment_text]
-                lines.append(line)
-        return lines
 
 def convert_examples_to_features(examples, label_list, max_seq_length,
                                  tokenizer, output_mode):
@@ -272,6 +216,15 @@ def main():
                         type=str,
                         required=True,
                         help="The output directory where the model predictions and checkpoints will be written.")
+    parser.add_argument("--task_name",
+                        default=None,
+                        type=str,
+                        required=True,
+                        help="The name of the task to train.")
+    parser.add_argument("--cls_model",
+                        default="default",
+                        type=str,
+                        help="Classification to use, could be 'default', 'context', 'deepcontext'")
     parser.add_argument("--output_file",
                         default=None,
                         type=str,
@@ -310,11 +263,13 @@ def main():
     args = parser.parse_args()
 
     processors = {
-        "jigsaw": JigsawProcessor,
+        "jigsaw-r": JigsawRegressionProcessor,
+        "jigsaw-c": JigsawClassifyProcessor
     }
 
     output_modes = {
-        "jigsaw": "regression",
+        "jigsaw-r": "regression",
+        "jigsaw-c": "classification"
     }
 
     device = torch.device("cuda")
@@ -334,7 +289,7 @@ def main():
     if not os.path.exists(args.output_dir):
         os.makedirs(args.output_dir)
 
-    task_name = 'jigsaw'
+    task_name = args.task_name
 
     if task_name not in processors:
         raise ValueError("Task not found: %s" % (task_name))
@@ -348,9 +303,15 @@ def main():
     tokenizer = BertTokenizer.from_pretrained(args.bert_model, do_lower_case=args.do_lower_case)
 
     cache_dir = args.cache_dir if args.cache_dir else os.path.join(str(PYTORCH_PRETRAINED_BERT_CACHE), 'distributed_{}'.format(args.local_rank))
-    model = BertForSequenceClassification.from_pretrained(args.bert_model,
-              cache_dir=cache_dir,
-              num_labels=num_labels)
+
+    if args.cls_model == "default":
+        model = BertForSequenceClassification.from_pretrained(args.bert_model,
+                cache_dir=cache_dir,
+                num_labels=num_labels)
+    elif args.cls_model == "context":
+        model = BertForSequenceClassificationContext.from_pretrained(args.bert_model,
+                cache_dir=cache_dir,
+                num_labels=num_labels)
 
     model.to(device)
 
