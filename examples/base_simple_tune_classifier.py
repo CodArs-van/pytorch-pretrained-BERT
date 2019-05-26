@@ -54,7 +54,7 @@ if __name__ == '__main__':
                 f.write('\n')
                 continue
             f.write('\n')
-        subprocess.call("python run_classifier.py --task_name {} --do_train --do_lower_case     \
+        subprocess.call("python train_jigsaw19.py --task_name {} \
             --data_dir /hdfs/input/xiaguo/ --bert_model bert-base-uncased --max_seq_length {}   \
             --train_batch_size {} --learning_rate {} --num_train_epochs {} --seed {}            \
             --output_dir {} --feature_cache_dir {} --use_feature_cache --cls_model {}".format(

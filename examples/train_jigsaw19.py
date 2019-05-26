@@ -110,7 +110,7 @@ class JigsawProcessor(DataProcessor):
     def get_train_examples(self, data_dir):
         """See base class."""
         return self._create_examples(
-            self._read_csv(os.path.join(data_dir, "train_19.csv"), keeps=[0, 1, 2]), "train")
+            self._read_csv(os.path.join(data_dir, "train.csv"), keeps=[0, 1, 2]), "train")
 
     def get_eval_examples(self, data_dir):
         """See base class."""
@@ -317,7 +317,7 @@ def main():
 
     parser.add_argument(
         "--cache_dir",
-        default="",
+        default=".cache",
         type=str,
         help="Where do you want to store the pre-trained models downloaded from s3")
     parser.add_argument(
@@ -413,7 +413,6 @@ def main():
     train_examples = None
     train_examples = processor.get_train_examples(args.data_dir)
     train_examples = processor.pad_examples('train', train_examples, args.train_batch_size, use_str=True)
-    train_examples = train_examples[:1000]
 
     num_train_optimization_steps = int(
             len(train_examples) / args.train_batch_size) * args.num_train_epochs
