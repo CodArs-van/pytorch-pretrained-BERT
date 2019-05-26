@@ -13,7 +13,7 @@ from torch.utils.data import (DataLoader, RandomSampler, SequentialSampler,
 from torch.utils.data.distributed import DistributedSampler
 from tqdm import tqdm, trange
 
-from torch.nn import CrossEntropyLoss, MSELoss
+from torch.nn import CrossEntropyLoss, MSELoss, Softmax
 from scipy.stats import pearsonr, spearmanr
 from sklearn.metrics import matthews_corrcoef, f1_score
 
@@ -22,7 +22,7 @@ from pytorch_pretrained_bert.modeling import BertForSequenceClassification, Bert
 from pytorch_pretrained_bert.tokenization import BertTokenizer
 from pytorch_pretrained_bert.optimization import BertAdam, WarmupLinearSchedule
 
-from run_classifier import JigsawRegressionProcessor, JigsawClassifyProcessor
+from train_jigsaw19 import JigsawRegressionProcessor, JigsawRegressionBinaryProcessor
 
 logger = logging.getLogger(__name__)
 
@@ -264,12 +264,12 @@ def main():
 
     processors = {
         "jigsaw-r": JigsawRegressionProcessor,
-        "jigsaw-c": JigsawClassifyProcessor
+        "jigsaw-b": JigsawRegressionBinaryProcessor
     }
 
     output_modes = {
         "jigsaw-r": "regression",
-        "jigsaw-c": "classification"
+        "jigsaw-c": "regression"
     }
 
     device = torch.device("cuda")
@@ -322,17 +322,10 @@ def main():
     logger.info("***** Running evaluation *****")
     logger.info("  Num examples = %d", len(infer_examples))
     logger.info("  Batch size = %d", args.infer_batch_size)
-    all_input_ids = torch.tensor(
-        [f.input_ids for f in infer_features], dtype=torch.long)
-    all_input_mask = torch.tensor(
-        [f.input_mask for f in infer_features], dtype=torch.long)
-    all_segment_ids = torch.tensor(
-        [f.segment_ids for f in infer_features], dtype=torch.long)
-
-    if output_mode == "classification":
-        all_label_ids = torch.tensor([f.label_id for f in infer_features], dtype=torch.long)
-    elif output_mode == "regression":
-        all_label_ids = torch.tensor([f.label_id for f in infer_features], dtype=torch.float)
+    all_input_ids   = torch.tensor([f.input_ids for f in infer_features],   dtype=torch.long)
+    all_input_mask  = torch.tensor([f.input_mask for f in infer_features],  dtype=torch.long)
+    all_segment_ids = torch.tensor([f.segment_ids for f in infer_features], dtype=torch.long)
+    all_label_ids   = torch.tensor([f.label_id for f in infer_features],    dtype=torch.float)
 
     infer_data = TensorDataset(all_input_ids, all_input_mask, all_segment_ids, all_label_ids)
     # Run prediction for full data
@@ -352,21 +345,25 @@ def main():
 
         with torch.no_grad():
             logits = model(input_ids, segment_ids, input_mask, labels=None)
+
+        if task_name == "jigsaw-r":
+            logits = logits
+        elif task_name == "jigsaw-b":
+            softmax = Softmax(dim=-1)
+            logits = softmax(logits)[:, -1].unsqueeze(-1)
+        else:
+            raise ValueError("Not supported task")
             
         nb_infer_steps += 1
         if len(preds) == 0:
             preds.append(logits.detach().cpu().numpy())
         else:
-            preds[0] = np.append(
-                preds[0], logits.detach().cpu().numpy(), axis=0)
+            preds[0] = np.append(preds[0], logits.detach().cpu().numpy(), axis=0)
                 
         start_index += len(input_ids)
 
     preds = preds[0]
-    if output_mode == "classification":
-        preds = np.argmax(preds, axis=1)
-    elif output_mode == "regression":
-        preds = np.squeeze(preds)
+    preds = np.squeeze(preds)
     
     df = pd.DataFrame()
     df['id'] = [example.guid.split('-')[1] for example in infer_examples]
