@@ -126,3 +126,5 @@ models
 
 *.csv
 *.tsv
+*/jigsaw-out/*
+*.pickle
