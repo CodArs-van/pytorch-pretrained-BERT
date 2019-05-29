@@ -84,7 +84,7 @@ if __name__ == '__main__':
                 logger.info('{} already inferenced...Skip...'.format(output_subdir))
                 continue
 
-            if not os.path.exists(os.path.join(output_subdir, 'bert_config.json')):
+            if not os.path.exists(os.path.join(output_subdir, 'config.json')):
                 logger.info('Skipping {}'.format(output_subdir))
                 continue
 
