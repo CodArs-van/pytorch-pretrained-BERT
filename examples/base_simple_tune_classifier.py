@@ -4,6 +4,7 @@ import logging
 import sys
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 lrs = ['2e-5', '3e-5']
 ns = [3]
