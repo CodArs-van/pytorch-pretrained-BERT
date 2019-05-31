@@ -10,7 +10,7 @@ lrs = ['2e-5', '3e-5']
 ns = [3]
 bss = [32, 64]
 seeds = [42]
-msls = [256, 384, 512]
+msls = [256, 384, 420]
 tasks = ['jigsaw-r-s', 'jigsaw-b-s']
 
 data_dir = '/hdfs/input/xiaguo/'
