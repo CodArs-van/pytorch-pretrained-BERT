@@ -80,7 +80,7 @@ if __name__ == '__main__':
             output_subdir = os.path.join(output_dir, subdir)
             output_subfile = '{}-{}.csv'.format(name, subdir)
 
-            if os.path.exists(os.path.join(output_subdir, output_subfile)):
+            if os.path.exists(os.path.join(infer_output_dir, output_subfile)):
                 logger.info('{} already inferenced...Skip...'.format(output_subdir))
                 continue
 
