@@ -279,6 +279,8 @@ def main():
         # Save a trained model, configuration and tokenizer
         model_to_save = model.module if hasattr(model, 'module') else model  # Only save the model it-self
         epoch_dir = os.path.join(args.output_dir, 'epoch{}'.format(epoch))
+        if not os.path.exists(epoch_dir):
+            os.makedirs(epoch_dir)
         output_model_file = os.path.join(epoch_dir, WEIGHTS_NAME)
         output_config_file = os.path.join(epoch_dir, CONFIG_NAME)
         torch.save(model_to_save.state_dict(), output_model_file)
