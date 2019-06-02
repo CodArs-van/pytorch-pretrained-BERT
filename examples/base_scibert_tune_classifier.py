@@ -64,7 +64,7 @@ if __name__ == '__main__':
                 --bert_model scibert-scivocab-uncased --max_seq_length {}                          \
                 --train_batch_size {} --learning_rate {} --num_train_epochs {} --seed {}    \
                 --output_dir {} --feature_cache_dir {} --use_feature_cache".format(
-                    task, data_dir, msl, bs, lr, n, seed, output_dir, './feature_cache'), shell=True)
+                    task, data_dir, msl, bs, lr, n, seed, output_dir, './feature_cache_sci'), shell=True)
 
             if ret != 0:
                 logger.error("Error train classifier, exit")
