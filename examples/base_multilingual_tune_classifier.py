@@ -10,7 +10,7 @@ lrs = ['2e-5', '3e-5']
 ns = [3]
 bss = [32, 64, 128]
 seeds = [42]
-msls = [256, 384, 512]
+msls = [256, 384, 360]
 tasks = ['jigsaw-r-s', 'jigsaw-b-s']
 
 data_dir = '/hdfs/input/xiaguo/'
@@ -37,7 +37,7 @@ if __name__ == '__main__':
     task, msl = tm[rank]
 
     for seed, lr, bs, n in params:
-        name = 'js_base_{}_msl{}_bs{}_lr{}_n{}_sd{}'.format(task, msl, bs, lr.replace('-', ''), n, seed)
+        name = 'js_base_{}_msl{}_bs{}_lr{}_n{}_sd{}_ml'.format(task, msl, bs, lr.replace('-', ''), n, seed)
         logger.info('Processing - {}'.format(name))
 
         output_dir =  os.path.join('.', 'jigsaw-out', name)

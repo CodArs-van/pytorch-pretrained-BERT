@@ -276,6 +276,15 @@ def main():
 
                 nb_tr_steps_save_index += 1
 
+        # Save a trained model, configuration and tokenizer
+        model_to_save = model.module if hasattr(model, 'module') else model  # Only save the model it-self
+        epoch_dir = os.path.join(args.output_dir, 'epoch{}'.format(epoch))
+        output_model_file = os.path.join(epoch_dir, WEIGHTS_NAME)
+        output_config_file = os.path.join(epoch_dir, CONFIG_NAME)
+        torch.save(model_to_save.state_dict(), output_model_file)
+        model_to_save.config.to_json_file(output_config_file)
+        tokenizer.save_vocabulary(epoch_dir)
+
     # Save a trained model, configuration and tokenizer
     model_to_save = model.module if hasattr(model, 'module') else model  # Only save the model it-self
 
