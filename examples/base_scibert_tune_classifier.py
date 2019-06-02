@@ -3,6 +3,7 @@ import os
 import logging
 import sys
 
+logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
@@ -53,18 +54,19 @@ if __name__ == '__main__':
         if training:
             sci_bert_dir = '/hdfs/input/xiaguo/scibert_scivocab_uncased'
             if os.path.exists(os.path.join(output_dir)):
-                for e in range(ns - 1, 0, -1):
+                for e in range(n - 1, -1, -1):
                     subdir = os.path.join(output_dir, 'epoch{}'.format(e))
                     if os.path.exists(os.path.join(subdir, 'config.json')):
                         sci_bert_dir = subdir
+                        logger.info('training continued from {}'.format(sci_bert_dir))
                         break
 
             # Train toxic classifier
             ret = subprocess.call("python train_jigsaw19.py --task_name {} --data_dir {}    \
-                --bert_model scibert-scivocab-uncased --max_seq_length {}                          \
+                --bert_model {} --max_seq_length {}                                         \
                 --train_batch_size {} --learning_rate {} --num_train_epochs {} --seed {}    \
                 --output_dir {} --feature_cache_dir {} --use_feature_cache".format(
-                    task, data_dir, msl, bs, lr, n, seed, output_dir, './feature_cache_sci'), shell=True)
+                    task, data_dir, sci_bert_dir, msl, bs, lr, n, seed, output_dir, './feature_cache_sci'), shell=True)
 
             if ret != 0:
                 logger.error("Error train classifier, exit")

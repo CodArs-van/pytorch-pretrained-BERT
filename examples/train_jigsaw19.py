@@ -123,7 +123,7 @@ def main():
     torch.manual_seed(args.seed)
     torch.cuda.manual_seed_all(args.seed)
 
-    if os.path.exists(args.output_dir) and os.listdir(args.output_dir):
+    if os.path.exists(os.path.join(args.output_dir, 'config.json')):
         raise ValueError(
             "Output directory ({}) already exists and is not empty.".format(args.output_dir))
 
