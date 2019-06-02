@@ -46,11 +46,19 @@ if __name__ == '__main__':
         training = True
 
         # If exists, skipping...
-        if os.path.exists(output_dir):
+        if os.path.exists(os.path.join(output_dir, 'config.json')):
             logger.info('{} exists, skipping training...'.format(output_dir))
             training = False
 
         if training:
+            sci_bert_dir = '/hdfs/input/xiaguo/scibert_scivocab_uncased'
+            if os.path.exists(os.path.join(output_dir)):
+                for e in range(ns - 1, 0, -1):
+                    subdir = os.path.join(output_dir, 'epoch{}'.format(e))
+                    if os.path.exists(os.path.join(subdir, 'config.json')):
+                        sci_bert_dir = subdir
+                        break
+
             # Train toxic classifier
             ret = subprocess.call("python train_jigsaw19.py --task_name {} --data_dir {}    \
                 --bert_model scibert-scivocab-uncased --max_seq_length {}                          \
