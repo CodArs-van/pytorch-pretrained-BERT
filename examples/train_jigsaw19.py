@@ -232,7 +232,7 @@ def main():
         tr_loss = 0
         nb_tr_examples, nb_tr_steps, nb_tr_steps_save, nb_tr_steps_save_index = 0, 0, 0, 0
         nb_tr_steps_total = len(train_dataloader)
-        nb_tr_steps_4percent = nb_tr_steps_total // 25
+        nb_tr_steps_10percent = nb_tr_steps_total // 10
         for step, batch in enumerate(tqdm(train_dataloader, desc="Iteration")):
             batch = tuple(t.to(device) for t in batch)
             input_ids, input_mask, segment_ids, label_ids = batch
@@ -270,7 +270,7 @@ def main():
                 logger.info("Train Loss: {}".format(tr_loss / (step + 1)))
 
             nb_tr_steps_save += 1
-            if nb_tr_steps_save >= nb_tr_steps_4percent and epoch > 0:
+            if nb_tr_steps_save >= nb_tr_steps_10percent and epoch > 0:
                 nb_tr_steps_save = 0
                 # Save a trained model, configuration and tokenizer
                 model_to_save = model.module if hasattr(
