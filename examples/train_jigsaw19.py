@@ -106,6 +106,11 @@ def main():
         type=int,
         default=42,
         help="random seed for initialization")
+    parser.add_argument(
+        '--gradient_accumulation_steps',
+        type=int,
+        default=1,
+        help="Number of updates steps to accumulate before performing a backward/update pass.")
     args = parser.parse_args()
 
     device = torch.device("cuda")
@@ -117,6 +122,10 @@ def main():
         level=logging.INFO)
 
     logger.info("device: {} n_gpu: {}".format(device, n_gpu))
+
+    assert args.gradient_accumulation_steps >= 1
+    assert args.train_batch_size % args.gradient_accumulation_steps == 0
+    args.train_batch_size = args.train_batch_size // args.gradient_accumulation_steps
 
     random.seed(args.seed)
     np.random.seed(args.seed)
@@ -150,7 +159,7 @@ def main():
     # train_examples = train_examples[:200]
 
     num_train_optimization_steps = int(
-        len(train_examples) / args.train_batch_size) * args.num_train_epochs
+        len(train_examples) / args.train_batch_size / args.gradient_accumulation_steps) * args.num_train_epochs
     cache_dir = args.cache_dir
 
     model = models[task_name].from_pretrained(args.bert_model,
@@ -244,17 +253,21 @@ def main():
             if n_gpu > 1:
                 loss = loss.mean()  # mean() to average on multi-gpu.
 
+            if args.gradient_accumulation_steps > 1:
+                loss = loss / args.gradient_accumulation_steps
+
             loss.backward()
             tr_loss += loss.item()
             nb_tr_examples += input_ids.size(0)
             nb_tr_steps += 1
 
-            optimizer.step()
-            optimizer.zero_grad()
-            global_step += 1
+            if (step + 1) % args.gradient_accumulation_steps == 0:
+                optimizer.step()
+                optimizer.zero_grad()
+                global_step += 1
 
             if global_step % 1000 == 1:
-                logger.info("Train Loss: {}".format(tr_loss / global_step))
+                logger.info("Train Loss: {}".format(tr_loss / (step + 1)))
 
             nb_tr_steps_save += 1
             if nb_tr_steps_save >= nb_tr_steps_4percent and epoch > 0:
