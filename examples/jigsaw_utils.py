@@ -148,6 +148,23 @@ class JigsawRegressionBinaryProcessor(JigsawRegressionProcessor):
         """See base class."""
         return [None, None]
 
+class JigsawUDAProcessor(JigsawRegressionBinaryProcessor):
+    """Processor for the Jigsaw data set (Kaggle version)."""
+
+    def get_unsupervised_examples(self, data_dir):
+        return self._create_unsup_examples(
+            self._read_csv(os.path.join(data_dir, "kgjs_fren.csv")), "unsup")
+
+    def _create_unsup_examples(self, lines, set_type):
+        """Create examples for unsupervised training"""
+        examples_ori, examples_bak = [], []
+        for line in lines:
+            guid = "{}-{}".format(set_type, line[0])
+            text_a_ori, text_a_bak, label = (line[2], line[3], "0.5")
+            examples_ori.append(InputExample(guid, text_a_ori, None, label))
+            examples_bak.append(InputExample(guid, text_a_bak, None, label))
+        return examples_ori, examples_bak
+
 
 def convert_examples_to_features(examples, label_list, max_seq_length,
                                  tokenizer, output_mode):
@@ -270,14 +287,17 @@ def serialize_features(feature_cache_path, features):
 processors = {
     "jigsaw-r-s": JigsawRegressionProcessor,
     "jigsaw-b-s": JigsawRegressionBinaryProcessor,
+    "jigsaw-u-s": JigsawUDAProcessor,
 }
 
 output_modes = {
     "jigsaw-r-s": "regression",
     "jigsaw-b-s": "regression",
+    "jigsaw-u-s": "regression",
 }
 
 models = {
     "jigsaw-r-s": BertForSequenceClassification,
     "jigsaw-b-s": BertForSequenceClassification,
+    "jigsaw-u-s": BertForSequenceClassification,
 }
