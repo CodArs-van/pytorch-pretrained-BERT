@@ -168,6 +168,8 @@ def main():
         elif task_name == "jigsaw-b-s":
             softmax = Softmax(dim=-1)
             logits = softmax(logits)[:, -1].unsqueeze(-1)
+        elif task_name == "jigsaw-u-s":
+            logits = Softmax(dim=-1)(logits)[:, -1].unsqueeze(-1)
         else:
             raise ValueError("Not supported task")
             
