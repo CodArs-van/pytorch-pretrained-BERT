@@ -47,8 +47,8 @@ if __name__ == '__main__':
             training = False
 
         if training:
-            assert bs % 64 == 0
-            gas = bs // 64
+            assert bs % 32 == 0
+            gas = bs // 32
             # Train toxic classifier
             ret = subprocess.call("python train_jigsaw19_uda.py --task_name {} --data_dir {}        \
                 --bert_model bert-base-uncased --max_seq_length {} --gradient_accumulation_steps {} \
