@@ -33,7 +33,7 @@ if __name__ == '__main__':
     task, msl, bs = tm[rank]
 
     for seed, lr, n in params:
-        name = 'js_mtdnnbase_{}_msl{}_bs{}_lr{}_n{}_sd{}'.format(task, msl, bs, lr.replace('-', ''), n, seed)
+        name = 'js_mtdnnbaseuda_{}_msl{}_bs{}_lr{}_n{}_sd{}'.format(task, msl, bs, lr.replace('-', ''), n, seed)
         logger.info('Processing - {}'.format(name))
 
         output_dir =  os.path.join('.', 'jigsaw-out', name)
