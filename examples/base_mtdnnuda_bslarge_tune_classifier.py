@@ -32,7 +32,7 @@ if __name__ == '__main__':
     rank = int(sys.argv[1])
     task, msl, bs = tm[rank]
 
-    for seed, lr, bs, n in params:
+    for seed, lr, n in params:
         name = 'js_mtdnnbase_{}_msl{}_bs{}_lr{}_n{}_sd{}'.format(task, msl, bs, lr.replace('-', ''), n, seed)
         logger.info('Processing - {}'.format(name))
 
@@ -57,8 +57,8 @@ if __name__ == '__main__':
                         break
 
             # Train toxic classifier
-            assert bs % 64 == 0
-            gas = bs // 64
+            assert bs % 32 == 0
+            gas = bs // 32
             ret = subprocess.call("python train_jigsaw19.py --task_name {} --data_dir {}    \
                 --bert_model {} --max_seq_length {} --gradient_accumulation_steps {}        \
                 --train_batch_size {} --learning_rate {} --num_train_epochs {} --seed {}    \
