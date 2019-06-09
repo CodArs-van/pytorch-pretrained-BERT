@@ -9,9 +9,9 @@ logger.setLevel(logging.INFO)
 
 lrs = ['2e-5', '3e-5']
 ns = [4]
-bss = [256, 512]
+bss = [256, 512, 1024]
 seeds = [42]
-msls = [280, 360]
+msls = [360]
 tasks = ['jigsaw-u-s']
 
 data_dir = '/hdfs/input/xiaguo/'
@@ -20,17 +20,17 @@ if __name__ == '__main__':
     params = []
     for seed in seeds:
         for lr in lrs:
-            for bs in bss:
-                for n in ns:
-                    params.append((seed, lr, bs, n))
+            for n in ns:
+                params.append((seed, lr, n))
 
     tm = []
-    for msl in msls:
-        for task in tasks:
-            tm.append((task, msl))
+    for bs in bss:
+        for msl in msls:
+            for task in tasks:
+                tm.append((task, msl, bs))
 
     rank = int(sys.argv[1])
-    task, msl = tm[rank]
+    task, msl, bs = tm[rank]
 
     for seed, lr, bs, n in params:
         name = 'js_mtdnnbase_{}_msl{}_bs{}_lr{}_n{}_sd{}'.format(task, msl, bs, lr.replace('-', ''), n, seed)
