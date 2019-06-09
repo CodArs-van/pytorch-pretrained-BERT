@@ -59,9 +59,9 @@ if __name__ == '__main__':
             # Train toxic classifier
             assert bs % 32 == 0
             gas = bs // 32
-            ret = subprocess.call("python train_jigsaw19.py --task_name {} --data_dir {}    \
-                --bert_model {} --max_seq_length {} --gradient_accumulation_steps {}        \
-                --train_batch_size {} --learning_rate {} --num_train_epochs {} --seed {}    \
+            ret = subprocess.call("python train_jigsaw19_uda.py --task_name {} --data_dir {}    \
+                --bert_model {} --max_seq_length {} --gradient_accumulation_steps {}            \
+                --train_batch_size {} --learning_rate {} --num_train_epochs {} --seed {}        \
                 --output_dir {} --feature_cache_dir {} --use_feature_cache".format(
                     task, data_dir, mtdnn_bert_dir, msl, gas, bs, lr, n, seed, output_dir, './feature_cache_mtdnn'), shell=True)
 
