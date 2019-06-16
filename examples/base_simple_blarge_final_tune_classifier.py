@@ -9,7 +9,7 @@ logger.setLevel(logging.INFO)
 lrs = ['2e-5']
 ns = [3]
 bss = [128]
-seeds = [42]
+seeds = [88, 77]
 msls = [384]
 tasks = ['jigsaw-b-s']
 
@@ -17,21 +17,21 @@ data_dir = '/hdfs/input/xiaguo/'
 
 if __name__ == '__main__':
     params = []
-    for seed in seeds:
+    for lr in lrs:
         for bs in bss:
             for n in ns:
-                params.append((seed, bs, n))
+                params.append((lr, bs, n))
 
     tm = []
-    for lr in lrs:
+    for seed in seeds:
         for msl in msls:
             for task in tasks:
-                tm.append((task, msl, lr))
+                tm.append((task, msl, seed))
 
     rank = int(sys.argv[1])
-    task, msl, lr = tm[rank]
+    task, msl, seed = tm[rank]
 
-    for seed, bs, n in params:
+    for lr, bs, n in params:
         name = 'js_base_{}_msl{}_bs{}_lr{}_n{}_sd{}'.format(task, msl, bs, lr.replace('-', ''), n, seed)
         logger.info('Processing - {}'.format(name))
 
