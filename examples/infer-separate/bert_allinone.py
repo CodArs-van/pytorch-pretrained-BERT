@@ -26,6 +26,7 @@ import unicodedata
 
 import numpy as np
 import pandas as pd
+import argparse
 
 import torch
 from torch import nn
@@ -34,6 +35,11 @@ from torch.utils.data import (DataLoader, RandomSampler, SequentialSampler, Tens
 from torch.utils.data.distributed import DistributedSampler
 from tqdm import tqdm, trange
 
+logging.basicConfig(format = '%(asctime)s - %(levelname)s - %(name)s -   %(message)s',
+                    datefmt = '%m/%d/%Y %H:%M:%S',
+                    level = logging.INFO)
+
+logger = logging.getLogger(__name__)
 
 # Bert Common
 class InputExample(object):
@@ -74,21 +80,29 @@ class DataProcessor(object):
         """Gets a collection of `InputExample`s for the train set."""
         raise NotImplementedError()
 
-    def get_eval_examples(self, data_dir):
-        """Gets a collection of `InputExample`s for the eval set."""
-        raise NotImplementedError()
-
-    def get_test_examples(self, data_dir):
-        """Gets a collection of `InputExample`s for the test set."""
+    def get_dev_examples(self, data_dir):
+        """Gets a collection of `InputExample`s for the dev set."""
         raise NotImplementedError()
 
     def get_labels(self):
         """Gets the list of labels for this data set."""
         raise NotImplementedError()
 
-    def pad_examples(self, examples, stride):
-        """Pad examples for multi-gpu training"""
+    def pad_examples(self, set_type, examples, stride):
+        """Pad examples to fix multi-gpu issue"""
         return examples
+
+    @classmethod
+    def _read_tsv(cls, input_file, quotechar=None):
+        """Reads a tab separated value file."""
+        with open(input_file, "r", encoding="utf-8") as f:
+            reader = csv.reader(f, delimiter="\t", quotechar=quotechar)
+            lines = []
+            for line in reader:
+                if sys.version_info[0] == 2:
+                    line = list(unicode(cell, 'utf-8') for cell in line)
+                lines.append(line)
+            return lines
 
     @classmethod
     def _read_csv(cls, input_file, keeps=None):
@@ -107,6 +121,67 @@ class DataProcessor(object):
         return lines
 
 
+class JigsawProcessor(DataProcessor):
+    """Processor for the Jigsaw data set (Kaggle version)."""
+
+    def get_train_examples(self, data_dir):
+        """See base class."""
+        return self._create_examples(
+            self._read_csv(os.path.join(data_dir, "train.csv"), keeps=[0, 1, 2]), "train")
+
+    def get_eval_examples(self, data_dir):
+        """See base class."""
+        return self._create_examples(
+            self._read_csv(os.path.join(data_dir, "eval.csv"), keeps=[0, 1, 2]), "eval")
+
+    def get_test_examples(self, data_dir):
+        """See base class."""
+        return self._create_examples(
+            self._read_csv(os.path.join(data_dir, "test.csv")), "test")
+
+    def _create_examples(self, lines, set_type):
+        raise NotImplementedError()
+
+    def pad_examples(self, set_type, examples, stride, use_str):
+        """Pad examples to fix multi-gpu issue"""
+        length = len(examples)
+        if length % stride != 0:
+            n_pad = stride - (length % stride)
+            logger.info("  Num pad = %d", n_pad)
+            for i in range(length, length + n_pad):
+                guid = "%s-%s-pad" % (set_type, i)
+                text_a = "This is just for padding"
+                label = '0' if use_str else 0.0
+                examples.append(
+                    InputExample(guid=guid, text_a=text_a, text_b=None, label=label))
+        return examples
+
+
+class JigsawRegressionProcessor(JigsawProcessor):
+    """Processor for the Jigsaw data set (Kaggle version)."""
+
+    def get_labels(self):
+        """See base class."""
+        return [None]
+
+    def _create_examples(self, lines, set_type):
+        """Creates examples for the training and dev sets."""
+        examples = []
+        for line in lines:
+            guid = "{}-{}".format(set_type, line[0])
+            text_a, label = (line[1], "0.5") if set_type == "test" else (line[2], line[1])
+            examples.append(InputExample(guid, text_a, None, label))
+        return examples
+
+
+class JigsawRegressionBinaryProcessor(JigsawRegressionProcessor):
+    """Processor for the Jigsaw data set (Kaggle version)."""
+
+    def get_labels(self):
+        """See base class."""
+        return [None, None]
+
+
 # Bert Utils
 CONFIG_NAME = "config.json"
 WEIGHTS_NAME = "pytorch_model.bin"
@@ -123,8 +198,6 @@ default_cache_path = os.path.join(torch_cache_home, 'bert_torch')
 from pathlib import Path
 PYTORCH_PRETRAINED_BERT_CACHE = Path(
     os.getenv('PYTORCH_PRETRAINED_BERT_CACHE', default_cache_path))
-
-logger = logging.getLogger(__name__)
 
 def _truncate_seq_pair(tokens_a, tokens_b, max_length):
     """Truncates a sequence pair in place to the maximum length."""
@@ -568,71 +641,6 @@ def _is_punctuation(char):
     if cat.startswith("P"):
         return True
     return False
-
-
-# Bert Jigsaw
-class JigsawRegressionProcessor(DataProcessor):
-    """Processor for the Jigsaw data set (Kaggle version)."""
-
-    def get_train_examples(self, data_dir):
-        """See base class."""
-        return self._create_examples(
-            self._read_csv(os.path.join(data_dir, "train.csv")), "train")
-
-    def get_eval_examples(self, data_dir):
-        """See base class."""
-        return self._create_examples(
-            self._read_csv(os.path.join(data_dir, "eval.csv"), keeps=[0, 1, 2]), "eval")
-
-    def get_test_examples(self, data_dir):
-        """See base class."""
-        return self._create_examples(
-            self._read_csv(os.path.join(data_dir, "test.csv")), "test")
-
-    def get_labels(self):
-        """See base class."""
-        return [None]
-
-    def _create_examples(self, lines, set_type):
-        """Creates examples for the training and dev sets."""
-        examples = []
-        for i, line in enumerate(lines):
-            guid = "{}-{}".format(set_type, line[0])
-            text_a, label = (line[1], "7") if set_type == "test" else (line[2], line[1])
-            examples.append(InputExample(guid, text_a, None, label))
-        return examples
-
-
-class JigsawClassifyProcessor(DataProcessor):
-    """Processor for the Jigsaw data set (Kaggle version)."""
-
-    def get_train_examples(self, data_dir):
-        """See base class."""
-        return self._create_examples(
-            self._read_csv(os.path.join(data_dir, "train.csv")), "train")
-
-    def get_eval_examples(self, data_dir):
-        """See base class."""
-        return self._create_examples(
-            self._read_csv(os.path.join(data_dir, "eval.csv")), "eval")
-
-    def get_test_examples(self, data_dir):
-        """See base class."""
-        return self._create_examples(
-            self._read_csv(os.path.join(data_dir, "test.csv")), "test")
-
-    def get_labels(self):
-        """See base class."""
-        return ["0", "1"]
-
-    def _create_examples(self, lines, set_type):
-        """Creates examples for the training and dev sets."""
-        examples = []
-        for i, line in enumerate(lines):
-            guid = "{}-{}".format(set_type, line[0])
-            text_a, label = (line[1], "7") if set_type == "test" else (line[2], "1" if float(line[1]) >= 0.5 else "0")
-            examples.append(InputExample(guid, text_a, None, label))
-        return examples
 
 
 # Bert Model
@@ -1245,25 +1253,20 @@ class BertPooler(nn.Module):
 
 
 # Bert Inference
-def inference(data_dir, bert_model, task_name, output_path, feature_cache_dir,
-    max_seq_length, do_lower_case, cls_model, infer_batch_size=8):
+def inference(data_dir, bert_model, task_name, output_path, max_seq_length, do_lower_case, infer_batch_size=8):
     
     processors = {
-        "jigsaw-r": JigsawRegressionProcessor,
-        "jigsaw-c": JigsawClassifyProcessor,
+        "jigsaw-r-s": JigsawRegressionProcessor,
+        "jigsaw-b-s": JigsawRegressionBinaryProcessor,
     }
 
     output_modes = {
-        "jigsaw-r": "regression",
-        "jigsaw-c": "classification"
+        "jigsaw-r-s": "regression",
+        "jigsaw-b-s": "regression",
     }
 
     device = torch.device("cuda")
     n_gpu = torch.cuda.device_count()
-
-    logging.basicConfig(format = '%(asctime)s - %(levelname)s - %(name)s -   %(message)s',
-                        datefmt = '%m/%d/%Y %H:%M:%S',
-                        level = logging.INFO)
 
     seed = 7
     random.seed(seed)
@@ -1282,34 +1285,14 @@ def inference(data_dir, bert_model, task_name, output_path, feature_cache_dir,
     label_list = processor.get_labels()
     num_labels = len(label_list)
 
-    cls_models = {
-        'cls-classical': BertForSequenceClassification,
-        'cls-context': BertForSequenceClassificationContext,
-        'cls-deepctx': BertForSequenceClassificationContextDeep,
-    }
-
     tokenizer = BertTokenizer.from_pretrained(bert_model, do_lower_case=do_lower_case)
-    model = cls_models[cls_model].from_pretrained(bert_model, num_labels)
+    model = BertForSequenceClassification.from_pretrained(bert_model, num_labels)
     model.to(device)
     model.eval()
 
-    if not feature_cache_dir:
-        raise ValueError("Feature cache directory is none")
-        
-    if not os.path.exists(feature_cache_dir):
-        os.makedirs(feature_cache_dir)
-
     # Load features from examples/cache
-    phase = 'test'
-    feature_cache_file = "task_{}-msl_{}-md_{}-ph_{}.pickle".format(
-        task_name, max_seq_length, 'uncased' if do_lower_case else 'cased', phase)
-    feature_cache_path = os.path.join(feature_cache_dir, feature_cache_file)
-    if not os.path.exists(feature_cache_path):
-        test_features = convert_examples_to_features(
-            test_examples, label_list, max_seq_length, tokenizer, output_mode)
-        serialize_features(feature_cache_path, test_features)
-    else:
-        test_features = deserialize_features(feature_cache_path)
+    test_features = convert_examples_to_features(
+        test_examples, label_list, max_seq_length, tokenizer, output_mode)
 
     logger.info("***** Running Inference *****")
     logger.info("  Num examples = %d", len(test_examples))
@@ -1319,10 +1302,10 @@ def inference(data_dir, bert_model, task_name, output_path, feature_cache_dir,
     all_input_mask  = torch.tensor([f.input_mask    for f in test_features], dtype=torch.long)
     all_segment_ids = torch.tensor([f.segment_ids   for f in test_features], dtype=torch.long)
 
-    if output_mode == "classification":
-        all_label_ids = torch.tensor([f.label_id for f in test_features], dtype=torch.long)
-    elif output_mode == "regression":
+    if output_mode == "regression":
         all_label_ids = torch.tensor([f.label_id for f in test_features], dtype=torch.float)
+    else:
+        raise ValueError("output_mode not supported")
 
     test_data = TensorDataset(all_input_ids, all_input_mask, all_segment_ids, all_label_ids)
     # Run prediction for full data
@@ -1339,18 +1322,79 @@ def inference(data_dir, bert_model, task_name, output_path, feature_cache_dir,
         with torch.no_grad():
             logits = model(input_ids, segment_ids, input_mask, labels=None)
 
+            if task_name == "jigsaw-r-s":
+                logits = logits
+            elif task_name == "jigsaw-b-s":
+                logits = nn.Softmax(dim=-1)(logits)[:, -1].unsqueeze(-1)
+
         if len(preds) == 0:
             preds.append(logits.detach().cpu().numpy())
         else:
             preds[0] = np.append(preds[0], logits.detach().cpu().numpy(), axis=0)
 
     preds = preds[0]
-    if output_mode == "classification":
-        preds = np.argmax(preds, axis=1)
-    elif output_mode == "regression":
+    if output_mode == "regression":
         preds = np.squeeze(preds)
+    else:
+        raise ValueError("Task not supported")
 
     df = pd.DataFrame()
-    df['id'] = [example.guid.split('-')[1] for example in test_examples]
-    df['prediction'] = preds
+    df["id"] = [example.guid.split('-')[1] for example in test_examples]
+    df["prediction"] = preds
     df.to_csv(output_path, index=False)
+
+if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--data_dir",
+        default=None,
+        type=str,
+        required=True,
+        help="The input data dir. Should contain the .csv files (or other data files) for the task.")
+    parser.add_argument(
+        "--bert_model",
+        default=None,
+        type=str,
+        required=True,
+        help="Bert pre-trained model selected in the list: bert-base-uncased, "
+             "bert-large-uncased, bert-base-cased, bert-large-cased, bert-base-multilingual-uncased, "
+             "bert-base-multilingual-cased, bert-base-chinese.")
+    parser.add_argument(
+        "--output_path",
+        default=None,
+        type=str,
+        required=True,
+        help="The output path where the model predictions will be written.")
+    parser.add_argument(
+        "--infer_batch_size",
+        default=32,
+        type=int,
+        help="Total batch size for inference.")
+    args = parser.parse_args()
+
+    import ntpath
+    bert_model = args.bert_model
+    base_name = ntpath.basename(bert_model)
+
+    task = "jigsaw-b-s"
+    if "jigsaw-b-s" not in base_name:
+        raise ValueError("base_model does not contain task name")
+
+    import re
+    msl = int(re.search("msl(\d+)", base_name).group(1))
+
+    bs = args.infer_batch_size
+    data_dir = args.data_dir
+    output_path = args.output_path
+
+    logger.info("Task: {}".format(task))
+    logger.info("Max Sequence Length: {}".format(msl))
+    logger.info("Batch Size: {}".format(bs))
+    logger.info("Bert Model: {}".format(bert_model))
+    logger.info("Output Path: {}".format(output_path))
+    logger.info("Data Directory: {}".format(data_dir))
+
+    inference(data_dir, bert_model, task, output_path, msl, True, bs)
+
+    logger.info("Inference Completes!")
