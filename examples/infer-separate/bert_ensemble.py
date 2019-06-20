@@ -1,3 +1,4 @@
+import os
 import logging
 import pandas as pd
 import subprocess
@@ -28,13 +29,16 @@ if __name__ == "__main__":
     data_dir = "C:\\Users\\xiaguo\\Developer\\Philly\\Jigsaw2019"
     bs = 32
     bert_models = [
-        "C:\\Users\\xiaguo\\Developer\\Philly\\Jigsaw2019\\outs\\Ensemble\\Candidates\\js_base_jigsaw-b-s_msl360_bs512_lr3e5_n4_sd42-epoch1",
-        "C:\\Users\\xiaguo\\Developer\\Philly\\Jigsaw2019\\outs\\Ensemble\\Candidates\\js_base_jigsaw-b-s_msl360_bs512_lr3e5_n4_sd42-epoch1",
+        "C:\\Users\\xiaguo\\Developer\\Philly\\Jigsaw2019\\outs\\Ensemble\\Candidates\\js_base_jigsaw-b-s_msl360_bs512_lr3e5_n4_sd42-epoch1-94208",
+        "C:\\Users\\xiaguo\\Developer\\Philly\\Jigsaw2019\\outs\\Ensemble\\Candidates\\js_base_jigsaw-b-s_msl384_bs128_lr2e5_n3_sd42-epoch1-94206",
+        "C:\\Users\\xiaguo\\Developer\\Philly\\Jigsaw2019\\outs\\Ensemble\\Candidates\\js_base_jigsaw-b-s_msl384_bs512_lr3e5_n3_sd88-e1-idx9-94172",
     ]
 
     lists = []
     for i, bert_model in enumerate(bert_models):
         output_path = "{}.csv".format(i)
+        if os.path.exists(output_path):
+            os.remove(output_path)
         command = "python {} --data_dir {} --bert_model {} --output_path {} --infer_batch_size {}".format(
             script, data_dir, bert_model, output_path, bs)
         logger.info(command)

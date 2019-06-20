@@ -1378,8 +1378,6 @@ if __name__ == "__main__":
     base_name = ntpath.basename(bert_model)
 
     task = "jigsaw-b-s"
-    if "jigsaw-b-s" not in base_name:
-        raise ValueError("base_model does not contain task name")
 
     import re
     msl = int(re.search("msl(\d+)", base_name).group(1))
