@@ -16,14 +16,15 @@ tune_params = [
     ('js_base_jigsaw-b-s_msl512_bs512_lr2e5_n3_sd77-e2-idx4', 'kgjs19_77', '0.94148'), # wu1
     ('js_base_jigsaw-b-s_msl512_bs512_lr2e5_n3_sd42-e2-idx4', 'kgjs19_42', '0.94147'), # wu1
     ('js_base_jigsaw-b-s_msl384_bs512_lr3e5_n3_sd88-e1-idx9', 'kgjs19_88', '0.94172'), # wu1
-    ('js_base_jigsaw-b-s_msl280_bs512_lr3e5_n4_sd42-epoch1', 'kgjs19_42', '0.94173'),
-    ('js_base_jigsaw-b-s_msl360_bs512_lr3e5_n4_sd42-epoech1', 'kgjs19_42', '0.94208'),
+    ('js_base_jigsaw-b-s_msl280_bs512_lr3e5_n4_sd42-epoch1', 'kgjs19_42', '0.94173'), # wu1
+    ('js_base_jigsaw-b-s_msl360_bs512_lr3e5_n4_sd42-epoech1', 'kgjs19_42', '0.94208'), # sc2
     ('js_mtdnnbase_jigsaw-b-s_msl360_bs128_lr3e5_n3_sd42-epoch1', 'kgjs19_42', '0.94135'), # sc2
     ('js_mtdnnbase_jigsaw-b-s_msl360_bs128_lr2e5_n3_sd42-epoch1', 'kgjs19_42', '0.94149'), # sc2
     ('js_mtdnnbase_jigsaw-b-s_msl360_bs256_lr2e5_n4_sd42-epoch1', 'kgjs19_42', '0.94128'),
     ('js_mtdnnbase_jigsaw-b-s_msl280_bs128_lr3e5_n3_sd42-epoch1', 'kgjs19_42', '0.94123'), # sc2
-    ('js_base_jigsaw-b-s_msl384_bs128_lr2e5_n3_sd42-epoch1', 'kgjs19_42', '0.94206'),
+    ('js_base_jigsaw-b-s_msl384_bs128_lr2e5_n3_sd42-epoch1', 'kgjs19_42', '0.94206'), # sc2
     ('js_mtdnnbase_jigsaw-b-s_msl280_bs128_lr2e5_n3_sd42-epoch1', 'kgjs19_42', '0.94141'), # sc2
+    ('js_base_jigsaw-b-s_msl512_bs512_lr3e5_n3_sd42/e2-idx4', 'kgjs19_42', '0.94140'), # sc2
 ]
 task = 'jigsaw-b-s'
 n = 3
