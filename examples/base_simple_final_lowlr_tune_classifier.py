@@ -48,7 +48,9 @@ if __name__ == '__main__':
     logger.info('msl: {}, bs: {}, seed: {}'.format(msl, bs, seed))
 
     logger.info('bert_model: {}'.format(bert_model))
-    exit()
+    if not os.path.exists(bert_model):
+        logger.error('bert_model not exists!')
+        sys.exit(-1)
 
     for _ in params:
         name = 'js_lowlr_{}_msl{}_bs{}_lr{}_n{}_sd{}'.format(task, msl, bs, lr.replace('-', ''), n, seed)
