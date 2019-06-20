@@ -353,6 +353,7 @@ def main():
 def run_aug(args, save_every_epoch=True):
     device = torch.device("cuda")
     n_gpu = torch.cuda.device_count()
+    logger.info("device: {} n_gpu: {}".format(device, n_gpu))
 
     processors = {
         # you can your processor here
@@ -390,9 +391,6 @@ def run_aug(args, save_every_epoch=True):
     #dev_examples = processor.get_dev_examples(args.data_dir)
     #train_examples.extend(dev_examples)
 
-    # DEBUG
-    train_examples = train_examples[:200]
-
     num_train_steps = int(len(train_examples) / args.train_batch_size / args.gradient_accumulation_steps) * args.num_train_epochs
 
     # Prepare model
@@ -405,7 +403,7 @@ def run_aug(args, save_every_epoch=True):
         model.bert.embeddings.token_type_embeddings = torch.nn.Embedding(6, 768)
         model.bert.embeddings.token_type_embeddings.weight.data.normal_(mean=0.0, std=0.02)
 
-    model.cuda()
+    model.to(device)
 
     # Prepare optimizer
     param_optimizer = list(model.named_parameters())
@@ -443,7 +441,7 @@ def run_aug(args, save_every_epoch=True):
         avg_loss = 0.
 
         for step, batch in enumerate(train_dataloader):
-            batch = tuple(t.cuda() for t in batch)
+            batch = tuple(t.to(device) for t in batch)
             _, input_ids, input_mask, segment_ids, masked_ids = batch
             loss = model(input_ids, segment_ids, input_mask, masked_ids)
 
