@@ -13,17 +13,17 @@ logger.setLevel(logging.INFO)
 
 # msl, bs, lr, seed
 tune_params = [
-    ('js_base_jigsaw-b-s_msl512_bs512_lr2e5_n3_sd77-e2-idx4', 'kgjs19_77', '0.94148'),
-    ('js_base_jigsaw-b-s_msl512_bs512_lr2e5_n3_sd42-e2-idx4', 'kgjs19_42', '0.94147'),
-    ('js_base_jigsaw-b-s_msl384_bs512_lr3e5_n3_sd88-e1-idx9', 'kgjs19_88', '0.94172'),
+    ('js_base_jigsaw-b-s_msl512_bs512_lr2e5_n3_sd77-e2-idx4', 'kgjs19_77', '0.94148'), # wu1
+    ('js_base_jigsaw-b-s_msl512_bs512_lr2e5_n3_sd42-e2-idx4', 'kgjs19_42', '0.94147'), # wu1
+    ('js_base_jigsaw-b-s_msl384_bs512_lr3e5_n3_sd88-e1-idx9', 'kgjs19_88', '0.94172'), # wu1
     ('js_base_jigsaw-b-s_msl280_bs512_lr3e5_n4_sd42-epoch1', 'kgjs19_42', '0.94173'),
     ('js_base_jigsaw-b-s_msl360_bs512_lr3e5_n4_sd42-epoech1', 'kgjs19_42', '0.94208'),
-    ('js_mtdnnbase_jigsaw-b-s_msl360_bs128_lr3e5_n3_sd42-epoch1', 'kgjs19_42', '0.94135'),
-    ('js_mtdnnbase_jigsaw-b-s_msl360_bs128_lr2e5_n3_sd42-epoch1', 'kgjs19_42', '0.94149'),
+    ('js_mtdnnbase_jigsaw-b-s_msl360_bs128_lr3e5_n3_sd42-epoch1', 'kgjs19_42', '0.94135'), # sc2
+    ('js_mtdnnbase_jigsaw-b-s_msl360_bs128_lr2e5_n3_sd42-epoch1', 'kgjs19_42', '0.94149'), # sc2
     ('js_mtdnnbase_jigsaw-b-s_msl360_bs256_lr2e5_n4_sd42-epoch1', 'kgjs19_42', '0.94128'),
-    ('js_mtdnnbase_jigsaw-b-s_msl280_bs128_lr3e5_n3_sd42-epoch1', 'kgjs19_42', '0.94123'),
+    ('js_mtdnnbase_jigsaw-b-s_msl280_bs128_lr3e5_n3_sd42-epoch1', 'kgjs19_42', '0.94123'), # sc2
     ('js_base_jigsaw-b-s_msl384_bs128_lr2e5_n3_sd42-epoch1', 'kgjs19_42', '0.94206'),
-    ('js_mtdnnbase_jigsaw-b-s_msl280_bs128_lr2e5_n3_sd42-epoch1', 'kgjs19_42', '0.94141'),
+    ('js_mtdnnbase_jigsaw-b-s_msl280_bs128_lr2e5_n3_sd42-epoch1', 'kgjs19_42', '0.94141'), # sc2
 ]
 task = 'jigsaw-b-s'
 n = 3
@@ -72,10 +72,10 @@ if __name__ == '__main__':
             gas = bs // mini
             # Train toxic classifier
             ret = subprocess.call("python train_jigsaw19_lowlr.py --task_name {} --data_dir {}      \
-                --bert_model bert-base-uncased --max_seq_length {} --gradient_accumulation_steps {} \
+                --bert_model {} --max_seq_length {} --gradient_accumulation_steps {} \
                 --train_batch_size {} --learning_rate {} --num_train_epochs {} --seed {}            \
                 --output_dir {} --feature_cache_dir {} --use_feature_cache".format(
-                    task, data_dir, msl, gas, bs, lr, n, seed, output_dir, './feature_cache'), shell=True)
+                    task, data_dir, bert_model, msl, gas, bs, lr, n, seed, output_dir, './feature_cache'), shell=True)
 
             if ret != 0:
                 logger.error("Error train classifier, exit")
