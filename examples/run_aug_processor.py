@@ -26,7 +26,7 @@ if __name__ == '__main__':
     logger.info('data_dir: {}'.format(data_dir))
     logger.info('msl: {}, bs: {}, gas: {}, lr: {}, n: {}, seed: {}'.format(
         msl, bs, gas, lr, n, seed))
-    ret = subprocess.call("python train_jigsaw19.py --task_name {} --data_dir {}            \
+    ret = subprocess.call("python train_aug_processor.py --task_name {} --data_dir {}       \
         --bert_model bert-base-uncased --max_seq_length {} --gradient_accumulation_steps {} \
         --train_batch_size {} --learning_rate {} --num_train_epochs {} --seed {}            \
         --output_dir {} --do_lower_case".format(
