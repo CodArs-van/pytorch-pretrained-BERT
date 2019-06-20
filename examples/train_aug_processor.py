@@ -404,6 +404,7 @@ def run_aug(args, save_every_epoch=True):
         model.bert.embeddings.token_type_embeddings.weight.data.normal_(mean=0.0, std=0.02)
 
     model.to(device)
+    model = torch.nn.DataParallel(model)
 
     # Prepare optimizer
     param_optimizer = list(model.named_parameters())
