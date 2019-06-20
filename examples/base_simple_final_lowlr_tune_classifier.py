@@ -29,7 +29,7 @@ task = 'jigsaw-b-s'
 n = 3
 lr = '1e-5'
 
-data_dir = '/hdfs/input/xiaguo/'
+data_dir = '/hdfs/input/xiaguo'
 
 if __name__ == '__main__':
     params = [1]
