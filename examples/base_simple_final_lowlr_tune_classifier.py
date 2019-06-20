@@ -44,7 +44,7 @@ if __name__ == '__main__':
     subdirname = fname[m.end() + 1:]
     bert_model = '{}/{}/{}/{}'.format(data_dir, subfolder, dirname, subdirname)
     msl = re.search(r'_msl(\d+)', fname).group(1)
-    bs = re.search(r'_bs(\d+)', fname).group(1)
+    bs = int(re.search(r'_bs(\d+)', fname).group(1))
     logger.info('msl: {}, bs: {}, seed: {}'.format(msl, bs, seed))
 
     logger.info('bert_model: {}'.format(bert_model))
