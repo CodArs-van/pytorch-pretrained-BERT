@@ -45,7 +45,7 @@ if __name__ == '__main__':
             training = False
 
         if training:
-            mini = 64 if bs <= 384 else 32
+            mini = 64 if msl <= 384 else 32
             assert bs % mini == 0
             gas = bs // mini
             # Train toxic classifier
