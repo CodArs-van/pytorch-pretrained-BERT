@@ -17,7 +17,7 @@ tune_params = [
     ('js_base_jigsaw-b-s_msl512_bs512_lr2e5_n3_sd42-e2-idx4', 'kgjs19_42', '0.94147'), # wu1
     ('js_base_jigsaw-b-s_msl384_bs512_lr3e5_n3_sd88-e1-idx9', 'kgjs19_88', '0.94172'), # wu1
     ('js_base_jigsaw-b-s_msl280_bs512_lr3e5_n4_sd42-epoch1', 'kgjs19_42', '0.94173'), # wu1
-    ('js_base_jigsaw-b-s_msl360_bs512_lr3e5_n4_sd42-epoech1', 'kgjs19_42', '0.94208'), # sc2
+    ('js_base_jigsaw-b-s_msl360_bs512_lr3e5_n4_sd42-epoch1', 'kgjs19_42', '0.94208'), # sc2
     ('js_mtdnnbase_jigsaw-b-s_msl360_bs128_lr3e5_n3_sd42-epoch1', 'kgjs19_42', '0.94135'), # sc2
     ('js_mtdnnbase_jigsaw-b-s_msl360_bs128_lr2e5_n3_sd42-epoch1', 'kgjs19_42', '0.94149'), # sc2
     ('js_mtdnnbase_jigsaw-b-s_msl360_bs256_lr2e5_n4_sd42-epoch1', 'kgjs19_42', '0.94128'),
@@ -46,6 +46,7 @@ if __name__ == '__main__':
     bert_model = '{}/{}/{}/{}'.format(data_dir, subfolder, dirname, subdirname)
     msl = re.search(r'_msl(\d+)', fname).group(1)
     bs = int(re.search(r'_bs(\d+)', fname).group(1))
+    flr = re.search(r'_lr(\d+)', fname).group(1)
     logger.info('msl: {}, bs: {}, seed: {}'.format(msl, bs, seed))
 
     logger.info('bert_model: {}'.format(bert_model))
@@ -54,7 +55,7 @@ if __name__ == '__main__':
         sys.exit(-1)
 
     for _ in params:
-        name = 'js_lowlr_{}_msl{}_bs{}_lr{}_n{}_sd{}'.format(task, msl, bs, lr.replace('-', ''), n, seed)
+        name = 'js_lowlr_{}_msl{}_bs{}_lr{}_n{}_sd{}'.format(task, msl, bs, flr.replace('-', ''), n, seed)
         logger.info('Processing - {}'.format(name))
 
         output_dir =  os.path.join('.', 'jigsaw-out', name)
