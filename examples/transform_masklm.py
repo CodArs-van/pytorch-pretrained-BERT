@@ -9,7 +9,7 @@ logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s -   %(message
 logger = logging.getLogger(__name__)
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--bert_model", type=str,
+parser.add_argument("--bert_model", type=str, required=True,
                     help="The path of pretrained bert model.")
 args = parser.parse_args()
 
