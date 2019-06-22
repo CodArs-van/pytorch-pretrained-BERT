@@ -372,20 +372,21 @@ def run_aug(args, save_every_epoch=False):
     df['id'] = df_train['id']
     df['target'] = df_train['target']
     for step, batch in enumerate(tqdm(train_dataloader, desc="Iteration")):
-        batch = tuple(t.to(device) for t in batch)
-        init_ids, _, input_mask, segment_ids, _ = batch
-        input_lens = [sum(mask).item() for mask in input_mask]
-        masked_idx = np.squeeze([np.random.randint(0, l, max(l // 7,2)) for l in input_lens])
-        for ids, idx in zip(init_ids, masked_idx):
-            ids[idx] = MASK_id
-        predictions = model(init_ids, segment_ids, input_mask)
-        for ids, idx, preds, seg in zip(init_ids, masked_idx, predictions, segment_ids):
-            pred = torch.argsort(preds)[:, -2][idx]
-            ids[idx] = pred
-            new_str = tokenizer.convert_ids_to_tokens(ids.cpu().numpy())
-            new_str = rev_wordpiece(new_str)
-            aug_comment.append(new_str)
-        torch.cuda.empty_cache()
+        with torch.no_grad():
+            batch = tuple(t.to(device) for t in batch)
+            init_ids, _, input_mask, segment_ids, _ = batch
+            input_lens = [sum(mask).item() for mask in input_mask]
+            masked_idx = np.squeeze([np.random.randint(0, l, max(l // 7,2)) for l in input_lens])
+            for ids, idx in zip(init_ids, masked_idx):
+                ids[idx] = MASK_id
+            predictions = model(init_ids, segment_ids, input_mask)
+            for ids, idx, preds, seg in zip(init_ids, masked_idx, predictions, segment_ids):
+                pred = torch.argsort(preds)[:, -2][idx]
+                ids[idx] = pred
+                new_str = tokenizer.convert_ids_to_tokens(ids.cpu().numpy())
+                new_str = rev_wordpiece(new_str)
+                aug_comment.append(new_str)
+            torch.cuda.empty_cache()
     df['comment_text'] = aug_comment
     df['comment_text_ori'] = df_train['comment_text']
     df.to_csv(os.path.join(args.output_dir, args.output_name), index=False)
