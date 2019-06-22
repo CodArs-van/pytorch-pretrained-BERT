@@ -287,6 +287,10 @@ def main():
                 model_to_save.config.to_json_file(output_config_file)
                 tokenizer.save_vocabulary(output_dir)
 
+                max_index = int(args.num_train_epochs) * 10 % 10
+                if int(args.num_train_epochs) == epoch and nb_tr_steps_save_index >= max_index:
+                    break
+
                 nb_tr_steps_save_index += 1
 
         # Save a trained model, configuration and tokenizer
