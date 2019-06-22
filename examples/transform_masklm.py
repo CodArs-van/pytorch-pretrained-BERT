@@ -14,7 +14,7 @@ parser.add_argument("--masklm_model", type=str, required=True,
 args = parser.parse_args()
 
 if __name__ == "__main__":
-    path = os.path.join(args.masklm_model, "pytorch_model.bin")
+    path = args.masklm_model
     logger.info("path: {}".format(path))
     state_dict = torch.load(path)
     if hasattr(state_dict, "module"):
