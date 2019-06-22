@@ -22,7 +22,7 @@ if __name__ == "__main__":
     bs = 64
     seed = 42
     bert_model = args.bert_model
-    output_name = "{}.csv".format(os.path.basename(bert_model))
+    output_name = "train_aug.csv"
     logger.info("task: {}, msl: {}, bs: {}, seed: {}".format(task, msl, bs, seed))
     logger.info("data_dir: {}".format(data_dir))
     logger.info("output_dir: {}".format(output_dir))
