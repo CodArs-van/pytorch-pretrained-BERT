@@ -228,7 +228,7 @@ def main():
         train_data, sampler=train_sampler, batch_size=args.train_batch_size)
     model.train()
 
-    for epoch in trange(int(args.num_train_epochs), desc="Epoch"):
+    for epoch in trange(int(np.ceil(args.num_train_epochs)), desc="Epoch"):
         tr_loss = 0
         nb_tr_examples, nb_tr_steps, nb_tr_steps_save, nb_tr_steps_save_index = 0, 0, 0, 0
         nb_tr_steps_total = len(train_dataloader)
@@ -266,8 +266,8 @@ def main():
                 optimizer.zero_grad()
                 global_step += 1
 
-            if global_step % 1000 == 1:
-                logger.info("Train Loss: {}".format(tr_loss / (step + 1)))
+                if global_step % 1000 == 1:
+                    logger.info("Train Loss: {}".format(tr_loss / (step + 1)))
 
             nb_tr_steps_save += 1
             if nb_tr_steps_save >= nb_tr_steps_10percent and epoch > 0:

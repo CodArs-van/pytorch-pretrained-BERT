@@ -37,7 +37,7 @@ if __name__ == '__main__':
             training = False
 
         if training:
-            mini = 4
+            mini = 8
             assert bs % mini == 0
             gas = bs // mini
             # Train toxic classifier
