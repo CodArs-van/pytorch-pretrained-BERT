@@ -227,7 +227,7 @@ def main():
     train_dataloader = DataLoader(
         train_data, sampler=train_sampler, batch_size=args.train_batch_size)
 
-    if task_name == "jigsaw-u-s":
+    if task_name == "jigsaw-u-s" or task_name == "jigsaw-x-s":
         train_examples_unsup_ori, train_examples_unsup_bak = processor.get_unsupervised_examples(args.data_dir)
 
         # DEBUG options
@@ -323,7 +323,7 @@ def main():
                 label_ids = label_ids.unsqueeze(1)
                 soft_labels = torch.cat([1 - label_ids, label_ids], dim=1)
                 loss = torch.sum(-soft_labels * logsoftmax(logits))
-            elif task_name == "jigsaw-u-s":
+            elif task_name == "jigsaw-u-s" or task_name == "jigsaw-x-s":
                 # Supervised loss
                 logsoftmax = LogSoftmax(dim=-1)
                 label_ids = label_ids.unsqueeze(1)
