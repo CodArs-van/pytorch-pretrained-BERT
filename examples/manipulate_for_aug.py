@@ -43,5 +43,21 @@ if __name__ == "__main__":
             dfs.append(pd.read_csv(path))
         df = pd.concat(dfs, ignore_index=True)
         df.to_csv(os.path.join(args.split_dir, "train_merge.csv"), index=False)
+    elif args.mode == "fix":
+        df = pd.read_csv(os.path.join(data_dir, "train.csv"))
+        rows = df.shape[0]
+        ct = rows // args.segment
+        logger.info("Total rows: {}".format(rows))
+        logger.info("Segment: {}".format(args.segment))
+        logger.info("Number of rows for each segment: {}".format(ct))
+        i = args.segment
+        start = i * ct
+        end = rows
+        logger.info("start: {} end: {}".format(start, end))
+        dfsub = df.iloc[start:end]
+        distdir = os.path.join(args.split_dir, "seg{}".format(i))
+        logger.info("Path distdir: {}".format(distdir))
+        os.makedirs(distdir, exist_ok=True)
+        dfsub.to_csv(os.path.join(distdir, "train.csv"), index=False)
     else:
         raise ValueError()
