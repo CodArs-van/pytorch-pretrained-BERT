@@ -36,6 +36,12 @@ if __name__ == "__main__":
             dfsub.to_csv(os.path.join(distdir, "train.csv"), index=False)
         logger.info("Done.")
     elif args.mode == "merge":
-        raise NotImplementedError()
+        dfs = []
+        for i in range(args.segment):
+            path = os.path.join(args.split_dir, "seg{}".format(i), "train_aug.csv")
+            logger.info("Path: {}".format(path))
+            dfs.append(pd.read_csv(path))
+        df = pd.concat(dfs, ignore_index=True)
+        df.to_csv(os.path.join(args.split_dir, "train_merge.csv"), index=False)
     else:
         raise ValueError()
