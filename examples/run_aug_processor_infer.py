@@ -12,10 +12,12 @@ logger = logging.getLogger(__name__)
 parser = argparse.ArgumentParser()
 parser.add_argument("--bert_model", type=str, required=True,
                     help="The path of pretrained bert model.")
+parser.add_argument("--data_dir", type=str, required=True,
+                    help="The path to train.csv")
 args = parser.parse_args()
 
 if __name__ == "__main__":
-    data_dir = '/hdfs/input/xiaguo/'
+    data_dir = args.data_dir
     task = 'jigsaw-b-s'
     msl = 512
     output_dir = 'aug-jigsaw'
