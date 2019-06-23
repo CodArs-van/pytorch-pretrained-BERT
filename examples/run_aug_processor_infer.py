@@ -21,7 +21,7 @@ if __name__ == "__main__":
     task = 'jigsaw-b-s'
     msl = 512
     output_dir = 'aug-jigsaw'
-    bs = 64
+    bs = 48
     seed = 42
     bert_model = args.bert_model
     output_name = "train_aug.csv"
