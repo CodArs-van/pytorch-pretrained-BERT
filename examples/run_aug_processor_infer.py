@@ -20,7 +20,7 @@ if __name__ == "__main__":
     data_dir = args.data_dir
     task = 'jigsaw-b-s'
     msl = 512
-    output_dir = args.bert_model
+    output_dir = args.data_dir
     bs = 48
     seed = 42
     bert_model = args.bert_model
