@@ -36,7 +36,6 @@ if __name__ == '__main__':
     rank = int(sys.argv[1])
     fname, subfolder, score = tune_params[rank]
     logger.info('Score: {}'.format(score))
-    logger.info('lr: {}, task: {}, n: {}'.format(lr, task, n))
 
     m = re.search(r'sd(\d+)', fname)
     seed = m.group(1)
@@ -46,6 +45,7 @@ if __name__ == '__main__':
     msl = re.search(r'_msl(\d+)', fname).group(1)
     bs = int(re.search(r'_bs(\d+)', fname).group(1))
     lr = re.search(r'_lr(.+)_', fname).group(1)
+    logger.info('lr: {}, task: {}, n: {}'.format(lr, task, n))
     logger.info('msl: {}, bs: {}, seed: {}'.format(msl, bs, seed))
 
     logger.info('bert_model: {}'.format(bert_model))
