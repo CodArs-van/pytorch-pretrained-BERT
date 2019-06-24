@@ -45,6 +45,7 @@ if __name__ == '__main__':
     msl = re.search(r'_msl(\d+)', fname).group(1)
     bs = int(re.search(r'_bs(\d+)', fname).group(1))
     lr = re.search(r'_lr(\d+e\d+)_', fname).group(1)
+    lr = lr.replace('e', 'e-')
     logger.info('lr: {}, task: {}, n: {}'.format(lr, task, n))
     logger.info('msl: {}, bs: {}, seed: {}'.format(msl, bs, seed))
 
@@ -54,7 +55,7 @@ if __name__ == '__main__':
         sys.exit(-1)
 
     for _ in params:
-        name = 'js_aug_{}_msl{}_bs{}_lr{}_n{}_sd{}'.format(task, msl, bs, lr.replace('e', 'e-'), n, seed)
+        name = 'js_aug_{}_msl{}_bs{}_lr{}_n{}_sd{}'.format(task, msl, bs, lr.replace('-', ''), n, seed)
         logger.info('Processing - {}'.format(name))
 
         output_dir =  os.path.join('.', 'jigsaw-out', name)
