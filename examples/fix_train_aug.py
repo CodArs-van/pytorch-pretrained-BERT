@@ -15,8 +15,8 @@ args = parser.parse_args()
 
 if __name__ == "__main__":
     df = pd.read_csv(args.data)
-    for i, (text_a, text_b) in enumerate(zip(df['comment_text'], df['comment_text_ori'])):
-        if math.isnan(text_a):
+    for i, (text_a, text_b, isnan) in enumerate(zip(df['comment_text'], df['comment_text_ori']), df['comment_text'].isnull()):
+        if isnan:
             logger.info("{} - text_a: {} - text_b: {}".format(i, text_a, text_b))
             # df['comment_text'][i] = text_b
     # df.to_csv('train_aug_fix.csv', index=False)
