@@ -228,11 +228,11 @@ def main():
         train_data, sampler=train_sampler, batch_size=args.train_batch_size)
     model.train()
 
-    for epoch in trange(int(args.num_train_epochs), desc="Epoch"):
+    for epoch in trange(int(np.ceil(args.num_train_epochs)), desc="Epoch"):
         tr_loss = 0
         nb_tr_examples, nb_tr_steps, nb_tr_steps_save, nb_tr_steps_save_index = 0, 0, 0, 0
         nb_tr_steps_total = len(train_dataloader)
-        nb_tr_steps_10percent = nb_tr_steps_total // 20
+        nb_tr_steps_10percent = nb_tr_steps_total // 10
         for step, batch in enumerate(tqdm(train_dataloader, desc="Iteration")):
             batch = tuple(t.to(device) for t in batch)
             input_ids, input_mask, segment_ids, label_ids = batch
@@ -286,6 +286,9 @@ def main():
                 model_to_save.config.to_json_file(output_config_file)
                 tokenizer.save_vocabulary(output_dir)
 
+                max_index = int(args.num_train_epochs * 10) % 10
+                if int(args.num_train_epochs) == epoch and nb_tr_steps_save_index >= max_index:
+                    break
                 nb_tr_steps_save_index += 1
 
         # Save a trained model, configuration and tokenizer
