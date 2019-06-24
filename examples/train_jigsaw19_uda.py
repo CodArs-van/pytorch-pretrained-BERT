@@ -251,6 +251,7 @@ def main():
 
         # Original text features
         train_features_unsup_ori = []
+        logger.info("train_features_unsup_ori processing...")
         if not os.path.exists(feature_cache_path_unsup_ori) or not args.use_feature_cache:
             train_features_unsup_ori = convert_examples_to_features(
                 train_examples_unsup_ori, label_list, args.max_seq_length, tokenizer, output_mode)
@@ -265,6 +266,7 @@ def main():
 
         # Back-translated text features
         train_features_unsup_bak = []
+        logger.info("train_features_unsup_bak processing...")
         if not os.path.exists(feature_cache_path_unsup_bak) or not args.use_feature_cache:
             train_features_unsup_bak = convert_examples_to_features(
                 train_examples_unsup_bak, label_list, args.max_seq_length, tokenizer, output_mode)
