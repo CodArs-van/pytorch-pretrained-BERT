@@ -41,7 +41,7 @@ if __name__ == '__main__':
     seed = m.group(1)
     dirname = fname[:m.end()]
     subdirname = fname[m.end() + 1:]
-    bert_model = '{}/{}/{}/{}'.format(data_dir, subfolder, dirname, subdirname)
+    bert_model = '{}/../{}/{}/{}'.format(data_dir, subfolder, dirname, subdirname)
     msl = re.search(r'_msl(\d+)', fname).group(1)
     bs = int(re.search(r'_bs(\d+)', fname).group(1))
     lr = re.search(r'_lr(.+)_', fname).group(1)
