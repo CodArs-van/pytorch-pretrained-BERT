@@ -18,6 +18,6 @@ if __name__ == "__main__":
     for i, (text_a, text_b, isnan) in enumerate(zip(df['comment_text'], df['comment_text_ori'], df['comment_text'].isnull())):
         if isnan:
             logger.info("{} - text_a: {} - text_b: {}".format(i, text_a, text_b))
+            df['comment_text'][i] = text_b
             logger.info("{}".format(df['comment_text'][i]))
-            # df['comment_text'][i] = text_b
-    # df.to_csv('train_aug_fix.csv', index=False)
+    df.to_csv('train_aug_fix.csv', index=False)
