@@ -263,6 +263,7 @@ def main():
                 train_features_unsup_ori = deserialize_features(feature_cache_path_unsup_ori)
             else:
                 raise ValueError("This is an unreachable path")
+        logger.info("train_features_unsup_ori len: {}".format(len(train_features_unsup_ori)))
 
         # Back-translated text features
         train_features_unsup_bak = []
@@ -279,6 +280,7 @@ def main():
             else:
                 raise ValueError("This is an unreachable path")
 
+        logger.info("train_features_unsup_bak len: {}".format(len(train_features_unsup_bak)))
         all_input_ids_unsup_ori     = torch.tensor(
             [f.input_ids    for f in train_features_unsup_ori], dtype=torch.long)
         all_input_mask_unsup_ori    = torch.tensor(
