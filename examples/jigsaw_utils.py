@@ -179,7 +179,7 @@ class JigsawUDAXProcessor(JigsawRegressionBinaryProcessor):
         for line in lines:
             guid = "{}-{}".format(set_type, line[0])
             text_a_ori, text_a_aug, label = (line[2], line[3], "0.5")
-            examples_aug.append(InputExample(guid, text_a_ori, None, label))
+            examples_ori.append(InputExample(guid, text_a_ori, None, label))
             examples_aug.append(InputExample(guid, text_a_aug, None, label))
         return examples_ori, examples_aug
 
