@@ -17,7 +17,7 @@ tune_params = [
 task = 'jigsaw-x-s'
 n = 2
 
-data_dir = '/hdfs/input/xiaguo/caug'
+data_dir = '/hdfs/input/xiaguo'
 
 if __name__ == '__main__':
     params = [1]
